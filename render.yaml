@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: pitchbooth
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    disk:
+      name: eve-state
+      mountPath: /opt/render/project/src/.eve/.workflow-data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: AGENT_SHARED_KEY
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ASSEMBLYAI_API_KEY
+        sync: false
+      - key: SPEECHMATICS_API_KEY
+        sync: false
+      - key: NEATLOGS_API_KEY
+        sync: false
