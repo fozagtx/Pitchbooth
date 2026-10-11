@@ -1,5 +1,8 @@
 import { spawn } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
+
+process.env.AGENT_SHARED_KEY ||= randomBytes(32).toString("base64url");
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const children = new Set();

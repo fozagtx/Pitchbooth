@@ -11,7 +11,7 @@ export async function POST(request: Request): Promise<Response> {
   if (limited) return limited;
 
   try {
-    requireEnv(["AGENT_SHARED_KEY", "OPENAI_API_KEY"]);
+    requireEnv(["OPENAI_API_KEY"]);
   } catch (error) {
     if (error instanceof MissingConfig) {
       return Response.json(
