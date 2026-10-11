@@ -97,9 +97,18 @@ export async function gradeRun(
     response,
     "The coach could not complete this turn.",
   ));
+  const coach = Object.fromEntries(
+    result.coach.map(({ key, points, note }) => [key, { points, note }]),
+  );
+  const cues = Object.fromEntries(
+    result.cues.map(({ cueId, status, note }) => [cueId, { status, note }]),
+  );
+  const drills = Object.fromEntries(
+    result.drills.map(({ key, drill }) => [key, drill]),
+  );
   const score = scoreRun({
     rubric: s.rubric,
-    coach: result.coach,
+    coach,
     words: input.words,
     durationSec: input.durationSec,
     targetSec: s.targetSec,
@@ -115,9 +124,9 @@ export async function gradeRun(
     lines,
     fixes: topFixes(lines, 3).map((line) => ({
       line,
-      drill: result.drills[line.key] ?? "",
+      drill: drills[line.key] ?? "",
     })),
-    cues: result.cues,
+    cues,
     durationSec: input.durationSec,
     stalls: input.stalls,
     wpm,

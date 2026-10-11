@@ -1,7 +1,8 @@
 import { trace } from "neatlogs";
 import { z } from "zod";
-import { agentClient } from "@/lib/agent-client";
+import { agentClient, turnFailure } from "@/lib/agent-client";
 import { limitResponse } from "@/lib/api";
+import type { MessageResult } from "eve/client";
 import {
   GradeOutputSchema,
   GradeTurnInputSchema,
@@ -55,31 +56,41 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const result = await trace(
-    {
-      name: kind,
-      kind: "WORKFLOW",
-      sessionId: eveSessionId,
-      captureInput: false,
-      captureOutput: false,
-    },
-    async () => {
-      const session = agentClient().sessions.attach(eveSessionId);
-      if (kind === "walkthrough") {
+  let result: MessageResult<unknown>;
+  try {
+    result = await trace(
+      {
+        name: kind,
+        kind: "WORKFLOW",
+        sessionId: eveSessionId,
+        captureInput: false,
+        captureOutput: false,
+      },
+      async () => {
+        const session = agentClient().sessions.attach(eveSessionId);
+        if (kind === "walkthrough") {
+          const response = await session.send(JSON.stringify(input), {
+            outputSchema: WalkthroughOutputSchema,
+          });
+          return response.result();
+        }
         const response = await session.send(JSON.stringify(input), {
-          outputSchema: WalkthroughOutputSchema,
+          outputSchema: GradeOutputSchema,
         });
         return response.result();
-      }
-      const response = await session.send(JSON.stringify(input), {
-        outputSchema: GradeOutputSchema,
-      });
-      return response.result();
-    },
-  ).catch(() => null);
+      },
+    );
+  } catch (error) {
+    console.error("[coach] agent call threw", error);
+    return Response.json({ error: "The coach could not complete this turn." }, { status: 502 });
+  }
 
   if (!result || result.status !== "completed" || !result.data) {
-    return Response.json({ error: "The coach could not complete this turn." }, { status: 502 });
+    const reason = result ? turnFailure(result) : undefined;
+    console.error("[coach] eve turn failed", reason ?? result?.status);
+    return Response.json({
+      error: `The coach could not complete this turn.${reason ? ` ${reason}` : ""}`,
+    }, { status: 502 });
   }
   return Response.json({ result: result.data });
 }

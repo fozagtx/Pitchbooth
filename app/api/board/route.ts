@@ -1,4 +1,4 @@
-import { agentClient } from "@/lib/agent-client";
+import { agentClient, turnFailure } from "@/lib/agent-client";
 import { limitResponse } from "@/lib/api";
 import { validateBoard } from "@/lib/board";
 import { BoardRequestSchema, BoardSchema } from "@/lib/coach";
@@ -54,7 +54,11 @@ export async function POST(request: Request): Promise<Response> {
     });
     const result = await response.result();
     if (result.status !== "completed" || !result.data) {
-      return Response.json({ error: "The coach could not build a board." }, { status: 502 });
+      const reason = turnFailure(result);
+      console.error("[board] eve turn failed", reason ?? result.status);
+      return Response.json({
+        error: `The coach could not build a board.${reason ? ` ${reason}` : ""}`,
+      }, { status: 502 });
     }
 
     const errors = validateBoard(result.data);
@@ -62,7 +66,8 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ error: errors }, { status: 502 });
     }
     return Response.json({ eveSessionId: response.sessionId, board: result.data });
-  } catch {
+  } catch (error) {
+    console.error("[board] agent call threw", error);
     return Response.json({ error: "The coach could not build a board." }, { status: 502 });
   }
 }

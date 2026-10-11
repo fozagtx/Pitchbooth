@@ -50,12 +50,7 @@ export const WalkthroughTurnInputSchema = z.object({
 export const WalkthroughOutputSchema = z.object({
   reply: z.string(),
   verdict: z.enum(["retry", "next"]),
-  adoptPhrase: z.string().optional(),
-});
-
-const ScoreSchema = z.object({
-  points: z.number(),
-  note: z.string(),
+  adoptPhrase: z.string(),
 });
 
 export const GradeTurnInputSchema = z.object({
@@ -74,12 +69,20 @@ export const GradeTurnInputSchema = z.object({
 });
 
 export const GradeOutputSchema = z.object({
-  coach: z.record(z.string(), ScoreSchema),
-  cues: z.record(z.string(), z.object({
+  coach: z.array(z.object({
+    key: z.string(),
+    points: z.number(),
+    note: z.string(),
+  })),
+  cues: z.array(z.object({
+    cueId: z.string(),
     status: z.enum(["landed", "weak", "missed"]),
     note: z.string(),
   })),
-  drills: z.record(z.string(), z.string()),
+  drills: z.array(z.object({
+    key: z.string(),
+    drill: z.string(),
+  })),
 });
 
 export type BoardTurnInput = z.infer<typeof BoardTurnInputSchema>;
