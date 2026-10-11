@@ -36,7 +36,7 @@ export interface Slide {
 
 export async function extractSlides(data: ArrayBuffer): Promise<Slide[]> {
   const loadingTask = getDocument({
-    data: new Uint8Array(data),
+    data: new Uint8Array(data.slice(0)),
     verbosity: 0,
   });
   const pdf = await loadingTask.promise;

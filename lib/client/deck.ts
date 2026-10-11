@@ -24,7 +24,7 @@ export async function readDeck(
   const data = await file.arrayBuffer();
   const extracted = await extractSlides(data);
   const loadingTask = getDocument({
-    data: new Uint8Array(data),
+    data: new Uint8Array(data.slice(0)),
     verbosity: 0,
   });
   const pdf = await loadingTask.promise;
