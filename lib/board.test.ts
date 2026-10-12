@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   cueView,
   hintFor,
+  isValidLabel,
   levelForRun,
   repairBoard,
   renameCue,
@@ -95,6 +96,11 @@ describe("board logic", () => {
         "Cue cue-0 labels cannot contain sentence punctuation.",
       );
     }
+  });
+
+  it("accepts only cue labels with one to three words", () => {
+    expect(isValidLabel("one two three four five six")).toBe(false);
+    expect(isValidLabel("Local stays")).toBe(true);
   });
 
   it("repairs near-valid boards without changing cue count or acts", () => {

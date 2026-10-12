@@ -45,6 +45,11 @@ function hasInvalidLabelPunctuation(label: string): boolean {
   });
 }
 
+export function isValidLabel(label: string): boolean {
+  const words = label.trim().split(/\s+/).filter(Boolean);
+  return words.length >= 1 && words.length <= 3 && !hasInvalidLabelPunctuation(label);
+}
+
 export function validateBoard(board: Board): string[] {
   const errors: string[] = [];
   const cueCount = board.cues.length;
@@ -72,12 +77,14 @@ export function validateBoard(board: Board): string[] {
   }
 
   for (const cue of board.cues) {
-    const words = cue.label.trim().split(/\s+/).filter(Boolean);
-    if (words.length < 1 || words.length > 3) {
-      errors.push(`Cue ${cue.id} labels must have 1 to 3 words.`);
-    }
-    if (hasInvalidLabelPunctuation(cue.label)) {
-      errors.push(`Cue ${cue.id} labels cannot contain sentence punctuation.`);
+    if (!isValidLabel(cue.label)) {
+      const words = cue.label.trim().split(/\s+/).filter(Boolean);
+      if (words.length < 1 || words.length > 3) {
+        errors.push(`Cue ${cue.id} labels must have 1 to 3 words.`);
+      }
+      if (hasInvalidLabelPunctuation(cue.label)) {
+        errors.push(`Cue ${cue.id} labels cannot contain sentence punctuation.`);
+      }
     }
     if (cue.keywords.length === 0) {
       errors.push(`Cue ${cue.id} must have at least one keyword.`);
@@ -228,10 +235,10 @@ export function renameCue(
   newLabel: string,
 ): Board {
   const label = newLabel.trim();
-  const words = label.split(/\s+/).filter(Boolean);
-  if (words.length < 1 || words.length > 3) {
+  if (!isValidLabel(label)) {
     throw new Error("Cue labels must have 1 to 3 words.");
   }
+  const words = label.split(/\s+/).filter(Boolean);
 
   return {
     ...board,

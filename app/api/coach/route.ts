@@ -2,6 +2,7 @@ import { trace } from "neatlogs";
 import { z } from "zod";
 import { sendWithRetry, turnFailure } from "@/lib/agent-client";
 import { limitResponse } from "@/lib/api";
+import { isValidLabel } from "@/lib/board";
 import type { MessageResult } from "eve/client";
 import {
   GradeOutputSchema,
@@ -93,6 +94,19 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({
       error: `The coach could not complete this turn.${reason ? ` ${reason}` : ""}`,
     }, { status: 502 });
+  }
+  if (kind === "walkthrough") {
+    const walkthroughResult = WalkthroughOutputSchema.parse(
+      stripDashes(result.data),
+    );
+    return Response.json({
+      result: {
+        ...walkthroughResult,
+        adoptPhrase: isValidLabel(walkthroughResult.adoptPhrase)
+          ? walkthroughResult.adoptPhrase
+          : "",
+      },
+    });
   }
   return Response.json({ result: stripDashes(result.data) });
 }

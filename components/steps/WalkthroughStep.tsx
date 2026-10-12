@@ -38,8 +38,10 @@ export function WalkthroughStep({ session, update, go }: StepProps) {
       try {
         const result = await walkthroughTurn(sessionRef.current, cue, text, attempt);
         if (result.adoptPhrase) {
-          const next = renameCue(sessionRef.current.board, cue.id, result.adoptPhrase);
-          if (validateBoard(next).length === 0) update((s) => ({ ...s, board: next }));
+          try {
+            const next = renameCue(sessionRef.current.board, cue.id, result.adoptPhrase);
+            if (validateBoard(next).length === 0) update((s) => ({ ...s, board: next }));
+          } catch {}
         }
         setReply(result.reply);
         setThinking(false);
