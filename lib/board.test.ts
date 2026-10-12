@@ -3,6 +3,7 @@ import {
   cueView,
   hintFor,
   levelForRun,
+  repairBoard,
   renameCue,
   validateBoard,
   type Board,
@@ -79,6 +80,89 @@ describe("board logic", () => {
     for (const board of invalidBoards) {
       expect(validateBoard(board).length).toBeGreaterThan(0);
     }
+  });
+
+  it("allows decimal points in labels but rejects sentence punctuation", () => {
+    const board = makeBoard();
+    board.cues[0] = { ...board.cues[0], label: "$1.5M" };
+    board.cues[1] = { ...board.cues[1], label: "2.5x growth" };
+    expect(validateBoard(board)).toEqual([]);
+
+    for (const label of ["Big win.", "Why?"]) {
+      const invalid = makeBoard();
+      invalid.cues[0] = { ...invalid.cues[0], label };
+      expect(validateBoard(invalid)).toContain(
+        "Cue cue-0 labels cannot contain sentence punctuation.",
+      );
+    }
+  });
+
+  it("repairs near-valid boards without changing cue count or acts", () => {
+    const board = makeBoard();
+    const slots = [3, 1, 2, 0, 5];
+    board.cues = board.cues.map((cue, index) => ({
+      ...cue,
+      id: index < 2 ? "duplicate" : cue.id,
+      slot: slots[index],
+      act: `Act ${index}`,
+      label:
+        index === 0
+          ? "One two three four five."
+          : index === 1
+            ? "$1.5M!!   growth? now"
+            : index === 4
+              ? "Open ask"
+              : cue.label,
+      keywords: index === 4 ? [] : cue.keywords,
+    }));
+    board.gaps = ["one", "two", "three", "four", "five"];
+    const originalCues = board.cues.map((cue) => ({
+      ...cue,
+      keywords: [...cue.keywords],
+    }));
+    const originalGaps = [...board.gaps];
+
+    const repaired = repairBoard(board);
+
+    expect(repaired.cues.map((cue) => cue.slot)).toEqual([0, 1, 2, 3, 4]);
+    expect(repaired.cues.map((cue) => cue.id)).toEqual([
+      "cue-3",
+      "duplicate",
+      "cue-2",
+      "duplicate-3",
+      "cue-4",
+    ]);
+    expect(new Set(repaired.cues.map((cue) => cue.id)).size).toBe(5);
+    expect(repaired.cues[3].label).toBe("One two three");
+    expect(repaired.cues[1].label).toBe("$1.5M growth now");
+    expect(repaired.cues[4].keywords).toEqual(["open ask"]);
+    expect(repaired.gaps).toEqual(["one", "two", "three"]);
+    expect(repaired.cues.map((cue) => cue.act)).toEqual([
+      "Act 3",
+      "Act 1",
+      "Act 2",
+      "Act 0",
+      "Act 4",
+    ]);
+    expect(repaired.cues).toHaveLength(board.cues.length);
+    expect(board.cues).toEqual(originalCues);
+    expect(board.gaps).toEqual(originalGaps);
+  });
+
+  it("sorts tied slots stably and places invalid slots last", () => {
+    const board = makeBoard();
+    board.cues[0] = { ...board.cues[0], slot: 1 };
+    board.cues[1] = { ...board.cues[1], slot: 1 };
+    board.cues[2] = { ...board.cues[2], slot: Number.NaN };
+    board.cues[3] = { ...board.cues[3], slot: 6 };
+
+    expect(repairBoard(board).cues.map((cue) => cue.id)).toEqual([
+      "cue-0",
+      "cue-1",
+      "cue-4",
+      "cue-2",
+      "cue-3",
+    ]);
   });
 
   it("builds concise hints and clamps run levels to one through four", () => {

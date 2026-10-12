@@ -1,10 +1,17 @@
 import { agentClient, turnFailure } from "@/lib/agent-client";
 import { limitResponse } from "@/lib/api";
-import { validateBoard } from "@/lib/board";
+import { repairBoard, validateBoard } from "@/lib/board";
 import { BoardRequestSchema, BoardSchema } from "@/lib/coach";
 import { MissingConfig, requireEnv } from "@/lib/env";
 
 export const runtime = "nodejs";
+
+function invalidBoardResponse(errors: string[]): Response {
+  console.error("[board] invalid board", errors);
+  return Response.json({
+    error: `The coach could not build a board. ${errors.join(" ")}`,
+  }, { status: 502 });
+}
 
 export async function POST(request: Request): Promise<Response> {
   const limited = limitResponse(request, "sessions");
@@ -61,11 +68,32 @@ export async function POST(request: Request): Promise<Response> {
       }, { status: 502 });
     }
 
-    const errors = validateBoard(result.data);
+    let board = repairBoard(result.data);
+    let errors = validateBoard(board);
     if (errors.length > 0) {
-      return Response.json({ error: errors }, { status: 502 });
+      let fixResult;
+      try {
+        const fixResponse = await agentClient()
+          .sessions.attach(response.sessionId)
+          .send(JSON.stringify({ kind: "board_fix", errors, board }), {
+            outputSchema: BoardSchema,
+          });
+        fixResult = await fixResponse.result();
+      } catch {
+        return invalidBoardResponse(errors);
+      }
+
+      if (fixResult.status !== "completed" || !fixResult.data) {
+        return invalidBoardResponse(errors);
+      }
+
+      board = repairBoard(fixResult.data);
+      errors = validateBoard(board);
+      if (errors.length > 0) {
+        return invalidBoardResponse(errors);
+      }
     }
-    return Response.json({ eveSessionId: response.sessionId, board: result.data });
+    return Response.json({ eveSessionId: response.sessionId, board });
   } catch (error) {
     console.error("[board] agent call threw", error);
     return Response.json({ error: "The coach could not build a board." }, { status: 502 });
