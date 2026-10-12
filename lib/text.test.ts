@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeWord, tokenize } from "./text";
+import { normalizeWord, stripDashes, tokenize } from "./text";
 
 describe("text normalization", () => {
   it("strips punctuation while preserving digits, dollar signs, and percent signs", () => {
@@ -17,5 +17,19 @@ describe("text normalization", () => {
       "$2m",
       "arr",
     ]);
+  });
+
+  it("replaces dashes in strings, nested objects, and arrays", () => {
+    expect(stripDashes("EHR \u2014 and")).toBe("EHR, and");
+    expect(stripDashes("12\u201314")).toBe("12-14");
+    expect(stripDashes({
+      details: {
+        examples: ["EHR \u2014 and", { range: "12\u201314" }],
+      },
+    })).toEqual({
+      details: {
+        examples: ["EHR, and", { range: "12-14" }],
+      },
+    });
   });
 });

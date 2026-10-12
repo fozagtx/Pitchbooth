@@ -1,6 +1,6 @@
 import { trace } from "neatlogs";
 import { z } from "zod";
-import { agentClient, turnFailure } from "@/lib/agent-client";
+import { sendWithRetry, turnFailure } from "@/lib/agent-client";
 import { limitResponse } from "@/lib/api";
 import type { MessageResult } from "eve/client";
 import {
@@ -10,6 +10,7 @@ import {
   WalkthroughTurnInputSchema,
 } from "@/lib/coach";
 import { MissingConfig, requireEnv } from "@/lib/env";
+import { stripDashes } from "@/lib/text";
 
 export const runtime = "nodejs";
 
@@ -67,17 +68,18 @@ export async function POST(request: Request): Promise<Response> {
         captureOutput: false,
       },
       async () => {
-        const session = agentClient().sessions.attach(eveSessionId);
         if (kind === "walkthrough") {
-          const response = await session.send(JSON.stringify(input), {
-            outputSchema: WalkthroughOutputSchema,
-          });
-          return response.result();
+          return sendWithRetry(
+            eveSessionId,
+            JSON.stringify(input),
+            WalkthroughOutputSchema,
+          );
         }
-        const response = await session.send(JSON.stringify(input), {
-          outputSchema: GradeOutputSchema,
-        });
-        return response.result();
+        return sendWithRetry(
+          eveSessionId,
+          JSON.stringify(input),
+          GradeOutputSchema,
+        );
       },
     );
   } catch (error) {
@@ -92,5 +94,5 @@ export async function POST(request: Request): Promise<Response> {
       error: `The coach could not complete this turn.${reason ? ` ${reason}` : ""}`,
     }, { status: 502 });
   }
-  return Response.json({ result: result.data });
+  return Response.json({ result: stripDashes(result.data) });
 }

@@ -1,8 +1,14 @@
-import { agentClient, turnFailure } from "@/lib/agent-client";
+import {
+  agentClient,
+  failureCode,
+  sendWithRetry,
+  turnFailure,
+} from "@/lib/agent-client";
 import { limitResponse } from "@/lib/api";
 import { repairBoard, validateBoard } from "@/lib/board";
 import { BoardRequestSchema, BoardSchema } from "@/lib/coach";
 import { MissingConfig, requireEnv } from "@/lib/env";
+import { stripDashes } from "@/lib/text";
 
 export const runtime = "nodejs";
 
@@ -59,7 +65,18 @@ export async function POST(request: Request): Promise<Response> {
       message,
       outputSchema: BoardSchema,
     });
-    const result = await response.result();
+    let result = await response.result();
+    if (
+      result.data === undefined &&
+      failureCode(result) === "OUTPUT_SCHEMA_NOT_FULFILLED"
+    ) {
+      result = await sendWithRetry(
+        response.sessionId,
+        message,
+        BoardSchema,
+        result,
+      );
+    }
     if (result.status === "failed" || result.data === undefined) {
       const reason = turnFailure(result);
       console.error("[board] eve turn failed", reason ?? result.status);
@@ -73,12 +90,11 @@ export async function POST(request: Request): Promise<Response> {
     if (errors.length > 0) {
       let fixResult;
       try {
-        const fixResponse = await agentClient()
-          .sessions.attach(response.sessionId)
-          .send(JSON.stringify({ kind: "board_fix", errors, board }), {
-            outputSchema: BoardSchema,
-          });
-        fixResult = await fixResponse.result();
+        fixResult = await sendWithRetry(
+          response.sessionId,
+          JSON.stringify({ kind: "board_fix", errors, board }),
+          BoardSchema,
+        );
       } catch {
         return invalidBoardResponse(errors);
       }
@@ -93,7 +109,10 @@ export async function POST(request: Request): Promise<Response> {
         return invalidBoardResponse(errors);
       }
     }
-    return Response.json({ eveSessionId: response.sessionId, board });
+    return Response.json({
+      eveSessionId: response.sessionId,
+      board: stripDashes(board),
+    });
   } catch (error) {
     console.error("[board] agent call threw", error);
     return Response.json({ error: "The coach could not build a board." }, { status: 502 });

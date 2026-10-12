@@ -21,3 +21,32 @@ export function tokenize(text: string): string[] {
     .map(normalizeWord)
     .filter(Boolean);
 }
+
+function stripDashValues(value: unknown): unknown {
+  if (typeof value === "string") {
+    return value
+      .replace(/(\d)\u2013(\d)/gu, "$1-$2")
+      .replace(/\s*[\u2014\u2013]\s*/gu, ", ");
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(stripDashValues);
+  }
+
+  if (value === null || typeof value !== "object") {
+    return value;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [key, stripDashValues(entry)]),
+  );
+}
+
+export function stripDashes<T>(value: T): T {
+  return stripDashValues(value) as T;
+}

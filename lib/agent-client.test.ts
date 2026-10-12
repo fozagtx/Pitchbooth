@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MessageResult } from "eve/client";
-import { turnFailure } from "./agent-client";
+import { failureCode, turnFailure } from "./agent-client";
 
 describe("turnFailure", () => {
   it("returns the message from the last failure event", () => {
@@ -21,5 +21,27 @@ describe("turnFailure", () => {
     } as unknown as MessageResult<unknown>;
 
     expect(turnFailure(result)).toBeUndefined();
+  });
+});
+
+describe("failureCode", () => {
+  it("returns the code from the last failure event", () => {
+    const result = {
+      events: [
+        { type: "step.failed", data: { code: "STEP_FAILED" } },
+        { type: "turn.failed", data: { code: "TURN_FAILED" } },
+        { type: "session.failed", data: { code: "SESSION_FAILED" } },
+      ],
+    } as unknown as MessageResult<unknown>;
+
+    expect(failureCode(result)).toBe("SESSION_FAILED");
+  });
+
+  it("returns undefined when no failure event exists", () => {
+    const result = {
+      events: [{ type: "turn.completed", data: {} }],
+    } as unknown as MessageResult<unknown>;
+
+    expect(failureCode(result)).toBeUndefined();
   });
 });
