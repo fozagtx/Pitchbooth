@@ -7,6 +7,8 @@ import {
 import { config } from "./config";
 import { requireEnv } from "./env";
 
+export const REPLY_NOW_MESSAGE = JSON.stringify({ kind: "reply_now" });
+
 export function turnFailure(result: MessageResult<unknown>): string | undefined {
   for (const event of [...result.events].reverse()) {
     if (
@@ -54,10 +56,19 @@ export async function sendWithRetry<TOutput>(
     return result;
   }
 
-  const retryResponse = await agentClient()
-    .sessions.attach(sessionId)
-    .send<TOutput>(message, { outputSchema });
-  return retryResponse.result();
+  for (const followupMessage of [REPLY_NOW_MESSAGE, message]) {
+    const followupResponse = await agentClient()
+      .sessions.attach(sessionId)
+      .send<TOutput>(followupMessage, { outputSchema });
+    result = await followupResponse.result();
+    if (
+      result.data !== undefined ||
+      failureCode(result) !== "OUTPUT_SCHEMA_NOT_FULFILLED"
+    ) {
+      return result;
+    }
+  }
+  return result;
 }
 
 export function agentClient(): Client {

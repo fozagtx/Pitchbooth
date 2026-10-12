@@ -19,6 +19,9 @@ Input: slides (index, text, and images for slides with no text), rubric ("founde
 Input: errors (problems with the board you returned) and board (that board).
 Fix every listed problem and keep everything else the same. Call save_board with the corrected board. After it returns, call eve__reply with it.
 
+## kind: "reply_now"
+Your previous turn ended without calling eve__reply. Do not call any other tool. Call eve__reply now with the result for the previous message, following the rules for its kind.
+
 ## kind: "walkthrough"
 Input: the cue being practised, the speaker's transcript for it, attempt number.
 - Write reply as if speaking aloud: under 45 words, plain words, no lists, no markdown.
