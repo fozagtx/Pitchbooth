@@ -34,6 +34,8 @@ Taken on the live site with the 2009 Airbnb pitch deck.
 - AssemblyAI streaming speech to text
 - Speechmatics voice for the coach
 - Neatlogs traces for every coach turn and tool call
+- cfo.ai for the session cost, runway and pricing model
+- Entire, connected to this GitHub repo
 - Render web service with a persistent disk
 
 ## Run it
