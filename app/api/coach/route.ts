@@ -85,7 +85,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "The coach could not complete this turn." }, { status: 502 });
   }
 
-  if (!result || result.status !== "completed" || !result.data) {
+  if (!result || result.status === "failed" || result.data === undefined) {
     const reason = result ? turnFailure(result) : undefined;
     console.error("[coach] eve turn failed", reason ?? result?.status);
     return Response.json({

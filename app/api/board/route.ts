@@ -60,7 +60,7 @@ export async function POST(request: Request): Promise<Response> {
       outputSchema: BoardSchema,
     });
     const result = await response.result();
-    if (result.status !== "completed" || !result.data) {
+    if (result.status === "failed" || result.data === undefined) {
       const reason = turnFailure(result);
       console.error("[board] eve turn failed", reason ?? result.status);
       return Response.json({
@@ -83,7 +83,7 @@ export async function POST(request: Request): Promise<Response> {
         return invalidBoardResponse(errors);
       }
 
-      if (fixResult.status !== "completed" || !fixResult.data) {
+      if (fixResult.status === "failed" || fixResult.data === undefined) {
         return invalidBoardResponse(errors);
       }
 
