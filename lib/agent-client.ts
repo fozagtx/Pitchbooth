@@ -7,7 +7,15 @@ import {
 import { config } from "./config";
 import { requireEnv } from "./env";
 
-export const REPLY_NOW_MESSAGE = JSON.stringify({ kind: "reply_now" });
+export function replyNowMessage(message: string): string {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(message);
+  } catch {
+    parsed = message;
+  }
+  return JSON.stringify({ kind: "reply_now", message: parsed });
+}
 
 export function turnFailure(result: MessageResult<unknown>): string | undefined {
   for (const event of [...result.events].reverse()) {
@@ -56,7 +64,11 @@ export async function sendWithRetry<TOutput>(
     return result;
   }
 
-  for (const followupMessage of [REPLY_NOW_MESSAGE, message]) {
+  const followupMessages: SendTurnInput<TOutput>["message"][] =
+    typeof message === "string"
+      ? [replyNowMessage(message), message]
+      : [message];
+  for (const followupMessage of followupMessages) {
     const followupResponse = await agentClient()
       .sessions.attach(sessionId)
       .send<TOutput>(followupMessage, { outputSchema });

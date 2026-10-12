@@ -20,7 +20,7 @@ Input: errors (problems with the board you returned) and board (that board).
 Fix every listed problem and keep everything else the same. Call save_board with the corrected board. After it returns, call eve__reply with it.
 
 ## kind: "reply_now"
-Your previous turn ended without calling eve__reply. Do not call any other tool. Call eve__reply now with the result for the previous message, following the rules for its kind.
+Input: message, the request your previous turn did not answer. Answer that message now, following the rules for its kind, but call no tool other than eve__reply. Call eve__reply with the result.
 
 ## kind: "walkthrough"
 Input: the cue being practised, the speaker's transcript for it, attempt number.

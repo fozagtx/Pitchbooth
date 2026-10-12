@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MessageResult } from "eve/client";
-import { failureCode, turnFailure } from "./agent-client";
+import { failureCode, replyNowMessage, turnFailure } from "./agent-client";
 
 describe("turnFailure", () => {
   it("returns the message from the last failure event", () => {
@@ -43,5 +43,14 @@ describe("failureCode", () => {
     } as unknown as MessageResult<unknown>;
 
     expect(failureCode(result)).toBeUndefined();
+  });
+});
+
+describe("replyNowMessage", () => {
+  it("includes the parsed previous request", () => {
+    expect(JSON.parse(replyNowMessage('{"kind":"walkthrough","x":1}'))).toEqual({
+      kind: "reply_now",
+      message: { kind: "walkthrough", x: 1 },
+    });
   });
 });
