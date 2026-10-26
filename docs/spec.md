@@ -78,7 +78,7 @@ components/   Board and the five session steps
 hooks/        Browser speech and run hooks
 lib/          Pure logic (tested) + lib/client browser helpers
 scripts/      Process supervisor for dev and start
-devpost/      Scope, PRD, spec, checklist, app map
+docs/         Scope, PRD, spec, checklist, app map
 ```
 
 ## External Services and Dependencies

@@ -56,11 +56,11 @@ CI (`.github/workflows/ci.yml`) runs `npm test`, `npm run typecheck` and `npm ru
 
 Planned and tracked with the [learn-ai-basics](https://github.com/challengepost/learn-ai-basics) workflow:
 
-- [`devpost/scope.md`](devpost/scope.md) — what Pitchbooth is and isn't
-- [`devpost/prd.md`](devpost/prd.md) — user journey, states, acceptance criteria
-- [`devpost/spec.md`](devpost/spec.md) — architecture, data model, services, failure modes
-- [`devpost/checklist.md`](devpost/checklist.md) — build slices with files, tests and commits
-- [`devpost/app-map.html`](devpost/app-map.html) — offline map of the code behind each step
+- [`docs/scope.md`](docs/scope.md) — what Pitchbooth is and isn't
+- [`docs/prd.md`](docs/prd.md) — user journey, states, acceptance criteria
+- [`docs/spec.md`](docs/spec.md) — architecture, data model, services, failure modes
+- [`docs/checklist.md`](docs/checklist.md) — build slices with files, tests and commits
+- [`docs/app-map.html`](docs/app-map.html) — offline map of the code behind each step
 
 ## Deploy
 
