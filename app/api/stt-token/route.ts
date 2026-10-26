@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { limitResponse } from "@/lib/api";
 import { config } from "@/lib/config";
 import { MissingConfig, requireEnv } from "@/lib/env";

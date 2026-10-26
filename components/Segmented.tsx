@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 "use client";
 
 export function Segmented<T extends string | number>({

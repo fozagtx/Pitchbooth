@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export function normalizeWord(word: string): string {
   let normalized = word
     .toLowerCase()

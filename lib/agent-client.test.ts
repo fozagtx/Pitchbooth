@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { describe, expect, it } from "vitest";
 import type { MessageResult } from "eve/client";
 import { failureCode, replyNowMessage, turnFailure } from "./agent-client";

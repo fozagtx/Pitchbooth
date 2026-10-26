@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export function newSessionId(): string {
   const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
   const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");

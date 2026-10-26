@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { defineAgent } from "eve";
 import { openai } from "eve/models/openai";
 

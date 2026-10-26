@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { describe, expect, it } from "vitest";
 import { downsample, floatTo16BitPcm, turnToWords } from "./stt";
 

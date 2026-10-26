@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { fillerRate, scoreRun, topFixes } from "../score";
 import type { Cue } from "../board";
 import type { Word } from "../tracker";

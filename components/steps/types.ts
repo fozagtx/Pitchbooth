@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import type { LocalSession } from "@/lib/client/store";
 
 export type Step = "board" | "walkthrough" | "run" | "score" | "takeaway";
