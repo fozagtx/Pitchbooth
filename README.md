@@ -48,6 +48,8 @@ npm run dev
 npm test
 ```
 
+CI (`.github/workflows/ci.yml`) runs `npm test`, `npm run typecheck` and `npm run build` on every push to `main` and every PR.
+
 `npm run dev` starts Next on port 3000 and the Eve agent on port 2000 through `scripts/supervise.mjs`.
 
 ## Project docs
@@ -63,3 +65,7 @@ Planned and tracked with the [learn-ai-basics](https://github.com/challengepost/
 ## Deploy
 
 `render.yaml` is a Render Blueprint. Add the same four keys in Render.
+
+## License
+
+[MIT](LICENSE)

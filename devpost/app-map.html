@@ -74,6 +74,9 @@ localStorage pitchbooth:&lt;id&gt;                                   Eve state p
     <tr><td>4</td><td>Blank board, optional reveal</td></tr>
   </table>
 
+  <h2>Practice to reuse</h2>
+  <p>Keep the rules in pure, tested functions and let routes and the agent call them. Here every new or repaired board goes through <code>validateBoard</code> and every rename through <code>isValidLabel</code> in <code>lib/board.ts</code>, which <code>lib/board.test.ts</code> covers, so a bad model reply never reaches the screen. Reuse the pattern for any AI output that the UI depends on.</p>
+
   <h2>Keys</h2>
   <table>
     <tr><th>Variable</th><th>Read in</th></tr>
