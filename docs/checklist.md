@@ -84,10 +84,10 @@ Build mode: not recorded (the app was built before this workflow was applied; sl
 
 - [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
 - [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] `docs/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
 Activity and evidence: App map generated from the code after the build and shared in the session; no learning activity run yet.
-Route and stops: `readDeck` → `checkFile` / `extractSlides` → `app/api/board/route.ts` → `repairBoard` / `validateBoard` → `createTracker` → `scoreRun` / `topFixes` (reference only, see `devpost/app-map.html`).
+Route and stops: `readDeck` → `checkFile` / `extractSlides` → `app/api/board/route.ts` → `repairBoard` / `validateBoard` → `createTracker` → `scoreRun` / `topFixes` (reference only, see `docs/app-map.html`).
 Edit outcome: not applicable yet.
 Reflection: not offered yet.
 Activity mode: explicit static fallback (offline app map).

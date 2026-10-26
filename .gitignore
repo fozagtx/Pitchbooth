@@ -6,4 +6,4 @@ node_modules
 !.env.example
 coverage
 *.tsbuildinfo
-/devpost/learner-profile.md
+/docs/learner-profile.md
