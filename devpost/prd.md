@@ -1,21 +1,49 @@
 ---
+doc: prd
 status: draft
 ---
 
-# Pitchbooth — PRD
+# Pitchbooth — Product Requirements
 
-## Who it is for
-Founders rehearsing an investor pitch and students rehearsing a school presentation, who have a slide deck as a PDF and want to deliver it from memory.
+## The Core Journey
+1. Drop a PDF deck on the landing page.
+2. See one board of cues made from it; pick founder or school rubric and a target time.
+3. Walk through each cue out loud (or typed) and hear the coach reply.
+4. Do a timed run while the board tracks what you said.
+5. See a score, what changed since the last run, and three fixes.
+6. Run again with less of the board, then print the takeaway.
 
-## Core journey
-1. **Landing** (`app/page.tsx`): drop or pick a PDF. The deck is read in the browser; slide previews render locally.
-2. **Board** (`components/steps/BoardStep.tsx`): one board of 5–7 cues (1–3 words each) grouped into 3–4 acts, plus an opener, a closer and up to 3 gaps the coach noticed. Pick the rubric (founder or school) and the target time.
-3. **Walkthrough** (`components/steps/WalkthroughStep.tsx`): for each cue, say (or type) what you would say. The coach replies by voice (Speechmatics) and text, and can rename a cue.
-4. **Run** (`components/steps/RunStep.tsx`): timed run with live transcription (AssemblyAI). Cues light up as reached, are marked skipped or recovered, and nudges appear for pace and stalls.
-5. **Score** (`components/steps/ScoreStep.tsx`): total score, change since the last run, three fixes, and a content / delivery breakdown with measured lines marked.
-6. **Takeaway** (`components/steps/TakeawayStep.tsx`): printable board, opener and closer, practice plan, fixes and run history.
+## Screens and Layout
+| Screen | File | What's on it |
+|---|---|---|
+| Landing | `app/page.tsx` | Hero, PDF drop zone, upload progress and errors |
+| Board | `components/steps/BoardStep.tsx` | Cue board, gaps, opener / closer, rubric and target time pickers, walkthrough / run buttons |
+| Walkthrough | `components/steps/WalkthroughStep.tsx` | Current cue, voice orb, mic and typed reply, coach reply |
+| Run | `components/steps/RunStep.tsx` | Fading board, timer, level picker, nudges, start / finish |
+| Score | `components/steps/ScoreStep.tsx` | Total, change since last run, three fixes, content and delivery breakdown |
+| Takeaway | `components/steps/TakeawayStep.tsx` | Printable board, opener / closer, practice plan, fixes, run history |
 
-## Board levels
+Session screens live under `app/s/[id]/page.tsx` and switch by step.
+
+## Look and Feel
+Paper / ink / chalk palette from `app/globals.css`; calm single-column steps; large tap targets; measured score lines are labelled "measured"; no dashboards.
+
+## Features and Behavior
+
+### Deck to board
+- PDFs over 20 pages or 20 MB are rejected before anything is sent.
+- Text is read in the browser; slides with little text also send an image.
+- The board always has 5–7 cues, slots `0..n-1`, 3–4 acts, at most 3 gaps, 1–3 word labels and keywords on every cue.
+
+### Walkthrough
+- One cue at a time, by voice or by typing.
+- The coach replies in text and by voice and may rename a cue.
+
+### Timed run
+- Live transcription marks cues reached, skipped or recovered and counts stalls.
+- Pace and time nudges appear during the run.
+- Run N starts at level N (capped at 4); the level can also be picked by hand.
+
 | Level | What shows |
 |---|---|
 | 1 | Full cue labels |
@@ -23,25 +51,34 @@ Founders rehearsing an investor pitch and students rehearsing a school presentat
 | 3 | Empty slots; reached / current states only |
 | 4 | Blank board, optional reveal |
 
-Run N starts at level N (capped at 4, `levelForRun`); the level can also be picked by hand on the run screen.
+### Score and takeaway
+- Every rubric line plus structure, clarity, pace, time, recovery and filler.
+- Three fixes chosen from the weakest lines.
+- Takeaway prints on one page.
 
-## Behaviours and states
-- PDF over 20 pages or 20 MB is rejected with a clear message before anything is sent.
-- Slides with little text send an image so the coach can still read them.
-- Missing server keys return a readable error (`MissingConfig` in `lib/env.ts`) instead of a crash; the UI shows it.
-- Microphone denied or speech service down: the walkthrough still works by typing; the run shows the error.
-- `/api/coach` is rate limited per client IP (`limitResponse` in `lib/api.ts`); over the limit returns 429.
-- Sessions survive a reload (`localStorage`); if storage is full, older previews are dropped first.
+## States and Boundaries
+- Missing server keys return a readable error instead of a crash; the UI shows it.
+- Microphone denied or speech service down: typed walkthrough still works; the run shows the error.
+- `/api/coach` is rate limited per client IP; over the limit returns 429.
+- Sessions survive a reload (`localStorage`); if storage is full, slide previews are dropped first.
+- Nothing is shared between browsers; there are no accounts.
 
-## Acceptance criteria
-- A real 10-slide deck produces a board that passes `validateBoard` (5–7 cues, slots `0..n-1`, 3–4 acts, ≤3 gaps, 1–3 word labels, keywords on every cue).
-- Speaking a cue's keywords marks it reached on the board during a run.
-- A finished run is graded with every rubric line plus structure, clarity, pace, time, recovery and filler.
-- A second run starts at level 2 by default.
-- The takeaway page prints cleanly.
+## Product Decisions
+- Cues are 1–3 words, never sentences, so the board can't become a script.
+- The board fades by run count, not by score, so practice always moves forward.
+- Delivery lines (pace, time, recovery, filler) are measured, not judged by the model.
 
-## Look and feel
-Paper / ink / chalk palette from `app/globals.css`; calm, single-column steps; large tap targets; no dashboards.
+## What We're Building
+Upload → board → walkthrough → timed fading runs → score → takeaway, for one deck per session, in English.
 
-## Non-goals
-Accounts, multi-deck libraries, non-English speech, deck editing.
+## Deferred From the POC
+Accounts, multi-deck libraries, non-English speech.
+
+## Possible Later Enhancements
+Sharing a board with a co-founder or teacher; syncing sessions across devices.
+
+## Non-Goals
+Teleprompter mode; editing the deck.
+
+## Open Questions
+None recorded yet.
