@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pitchbooth — App map</title>
+<style>
+  :root { --paper:#f7f5ef; --ink:#1d1d1b; --muted:#6b6a64; --line:#dedbd2; --cue:#e9b949; --slate:#4a6572; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:960px; margin:0 auto; padding:48px 24px 80px; }
+  h1 { font-size:40px; font-weight:700; letter-spacing:-0.02em; margin:0 0 8px; }
+  h2 { font-size:22px; font-weight:650; margin:48px 0 12px; }
+  h3 { font-size:17px; font-weight:600; margin:0 0 6px; }
+  p.lead { color:var(--muted); font-size:18px; margin:0 0 32px; }
+  code { font:13px ui-monospace, SFMono-Regular, Menlo, monospace; background:#fff; border:1px solid var(--line); border-radius:4px; padding:1px 5px; }
+  ol.flow { list-style:none; padding:0; margin:0; counter-reset:s; }
+  ol.flow > li { counter-increment:s; position:relative; background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px 18px 64px; margin-bottom:12px; }
+  ol.flow > li::before { content:counter(s); position:absolute; left:20px; top:18px; width:28px; height:28px; border-radius:50%; background:var(--ink); color:var(--paper); display:grid; place-items:center; font-weight:600; font-size:14px; }
+  .files { margin-top:8px; font-size:14px; color:var(--muted); }
+  .files code { margin:2px 2px 0 0; display:inline-block; }
+  table { width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; font-size:14px; }
+  th, td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-weight:600; background:#fbfaf6; }
+  pre { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; overflow:auto; font:13px/1.5 ui-monospace, Menlo, monospace; }
+  .tag { display:inline-block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; padding:2px 8px; border-radius:99px; margin-left:6px; vertical-align:2px; }
+  .b { background:#efe7d1; } .s { background:#dfe8ec; } .a { background:#e8e1ef; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Pitchbooth app map</h1>
+  <p class="lead">How a PDF deck becomes a board you can pitch without. Every name below is a real file or function in the repo.</p>
+
+  <h2>Where things run</h2>
+<pre>Browser                      Next.js server (PORT)              Eve agent (127.0.0.1:2000)
+lib/client/deck.ts  ──────▶  app/api/board/route.ts  ─────────▶  agent/tools/save_board.ts
+components/steps/*  ──────▶  app/api/coach/route.ts  ─────────▶  update_cue · log_note · log_run
+hooks/useListener.ts ◀─────  app/api/stt-token/route.ts ◀── AssemblyAI
+hooks/useSpeaker.ts  ◀─────  app/api/tts/route.ts       ◀── Speechmatics
+localStorage pitchbooth:&lt;id&gt;                                   Eve state pitchbooth.record</pre>
+  <p>Both servers start together from <code>scripts/supervise.mjs</code>, which also creates <code>AGENT_SHARED_KEY</code>; <code>agent/channels/eve.ts</code> checks it on every call.</p>
+
+  <h2>The journey through the code</h2>
+  <ol class="flow">
+    <li><h3>Upload the deck <span class="tag b">browser</span></h3>
+      <code>app/page.tsx</code> takes the file. <code>readDeck</code> in <code>lib/client/deck.ts</code> calls <code>checkFile</code> (20 pages / 20 MB) and <code>extractSlides</code> from <code>lib/pdf.ts</code> to pull slide text, renders previews and keeps an image only for slides with little text.
+      <div class="files"><code>lib/pdf.ts</code><code>lib/client/deck.ts</code><code>lib/text.ts</code></div></li>
+    <li><h3>Make the board <span class="tag s">server</span><span class="tag a">agent</span></h3>
+      <code>app/api/board/route.ts</code> requires <code>OPENAI_API_KEY</code> (<code>requireEnv</code>, <code>lib/env.ts</code>), asks the agent, then runs <code>repairBoard</code> and <code>validateBoard</code> from <code>lib/board.ts</code>: 5–7 cues, 3–4 acts, ≤3 gaps, 1–3 word labels. The agent stores it with <code>save_board</code>.
+      <div class="files"><code>lib/board.ts</code><code>lib/coach.ts</code><code>agent/instructions.md</code><code>lib/record.ts</code></div></li>
+    <li><h3>Save the session <span class="tag b">browser</span></h3>
+      <code>createSession</code> posts to the board route; the new id (<code>lib/session.ts</code>) opens <code>app/s/[id]/page.tsx</code>. <code>lib/client/store.ts</code> saves a <code>LocalSession</code> under <code>pitchbooth:&lt;id&gt;</code>, dropping previews if storage is full.
+      <div class="files"><code>lib/client/store.ts</code><code>components/steps/BoardStep.tsx</code><code>components/Board.tsx</code></div></li>
+    <li><h3>Walk through the cues <span class="tag b">browser</span><span class="tag a">agent</span></h3>
+      <code>components/steps/WalkthroughStep.tsx</code> sends each spoken or typed answer to <code>app/api/coach/route.ts</code> (rate limited by <code>limitResponse</code>). Replies are spoken through <code>hooks/useSpeaker.ts</code> → <code>app/api/tts/route.ts</code>. The agent can rename a cue (<code>update_cue</code> → <code>renameCue</code>) and keeps notes (<code>log_note</code>).
+      <div class="files"><code>lib/client/api.ts</code><code>agent/tools/update_cue.ts</code><code>agent/tools/log_note.ts</code></div></li>
+    <li><h3>Timed run <span class="tag b">browser</span></h3>
+      <code>components/steps/RunStep.tsx</code> picks the level with <code>levelForRun</code>. <code>hooks/useListener.ts</code> gets a token from <code>app/api/stt-token/route.ts</code>, streams 16 kHz PCM (<code>lib/stt.ts</code>) to AssemblyAI, and feeds words to <code>createTracker</code> in <code>lib/tracker.ts</code>, which marks cues reached, skipped or recovered and counts stalls. <code>lib/nudges.ts</code> watches pace.
+      <div class="files"><code>hooks/useRun.ts</code><code>lib/client/run.ts</code><code>lib/tracker.ts</code><code>lib/nudges.ts</code></div></li>
+    <li><h3>Score <span class="tag b">browser</span><span class="tag a">agent</span></h3>
+      The agent grades content against the founder or school rubric; <code>scoreRun</code> in <code>lib/score.ts</code> adds measured pace, time, recovery and filler, and <code>topFixes</code> picks three. The run is logged with <code>log_run</code> and shown in <code>components/steps/ScoreStep.tsx</code>.
+      <div class="files"><code>lib/score.ts</code><code>agent/tools/log_run.ts</code></div></li>
+    <li><h3>Takeaway <span class="tag b">browser</span></h3>
+      <code>components/steps/TakeawayStep.tsx</code> prints the board, opener, closer, practice plan, fixes and run history.</li>
+  </ol>
+
+  <h2>Board levels</h2>
+  <table>
+    <tr><th>Level</th><th>Shows</th><th>Code</th></tr>
+    <tr><td>1</td><td>Full labels</td><td rowspan="4"><code>cueView</code>, <code>hintFor</code> in <code>lib/board.ts</code>; drawn by <code>components/Board.tsx</code></td></tr>
+    <tr><td>2</td><td>Abbreviated hints</td></tr>
+    <tr><td>3</td><td>Empty slots, reached / current state</td></tr>
+    <tr><td>4</td><td>Blank board, optional reveal</td></tr>
+  </table>
+
+  <h2>Keys</h2>
+  <table>
+    <tr><th>Variable</th><th>Read in</th></tr>
+    <tr><td><code>OPENAI_API_KEY</code></td><td>Eve agent, <code>app/api/board/route.ts</code>, <code>app/api/coach/route.ts</code></td></tr>
+    <tr><td><code>ASSEMBLYAI_API_KEY</code></td><td><code>app/api/stt-token/route.ts</code></td></tr>
+    <tr><td><code>SPEECHMATICS_API_KEY</code></td><td><code>app/api/tts/route.ts</code></td></tr>
+    <tr><td><code>NEATLOGS_API_KEY</code> (optional)</td><td><code>instrumentation.ts</code></td></tr>
+  </table>
+</main>
+</body>
+</html>

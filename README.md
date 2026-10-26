@@ -40,13 +40,25 @@ Taken on the live site with the 2009 Airbnb pitch deck.
 
 ## Run it
 
-Set `OPENAI_API_KEY`, `ASSEMBLYAI_API_KEY`, `SPEECHMATICS_API_KEY` and `NEATLOGS_API_KEY`, then:
+Set the keys listed in `.env.example` (`OPENAI_API_KEY`, `ASSEMBLYAI_API_KEY`, `SPEECHMATICS_API_KEY`, optional `NEATLOGS_API_KEY`), then:
 
 ```bash
 npm install
 npm run dev
 npm test
 ```
+
+`npm run dev` starts Next on port 3000 and the Eve agent on port 2000 through `scripts/supervise.mjs`.
+
+## Project docs
+
+Planned and tracked with the [learn-ai-basics](https://github.com/challengepost/learn-ai-basics) workflow:
+
+- [`devpost/scope.md`](devpost/scope.md) — what Pitchbooth is and isn't
+- [`devpost/prd.md`](devpost/prd.md) — user journey, states, acceptance criteria
+- [`devpost/spec.md`](devpost/spec.md) — architecture, data model, services, failure modes
+- [`devpost/checklist.md`](devpost/checklist.md) — build slices with files, tests and commits
+- [`devpost/app-map.html`](devpost/app-map.html) — offline map of the code behind each step
 
 ## Deploy
 
