@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { supervise } from "./supervise.mjs";
 
 supervise([

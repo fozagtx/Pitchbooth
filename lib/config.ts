@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export const config = {
   agentUrl: "http://127.0.0.1:2000",
   assemblyTokenUrl: "https://streaming.assemblyai.com/v3/token",

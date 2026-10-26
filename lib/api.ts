@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { createLimiter, LIMITS } from "./ratelimit";
 
 const limiters = {

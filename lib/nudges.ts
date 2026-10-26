@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import type { Word } from "./tracker";
 
 export interface Nudger {

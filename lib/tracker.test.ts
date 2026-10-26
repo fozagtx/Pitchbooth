@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { describe, expect, it } from "vitest";
 import { createTracker } from "./tracker";
 import type { Cue } from "./board";

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { trace } from "neatlogs";
 import { z } from "zod";
 import { sendWithRetry, turnFailure } from "@/lib/agent-client";

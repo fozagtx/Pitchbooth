@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { timingSafeEqual } from "node:crypto";
 import {
   withAuthChallenges,

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export type Act = "Open" | "Problem" | "Product" | "Proof" | "Close" | string;
 
 export interface Cue {

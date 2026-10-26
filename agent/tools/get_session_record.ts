@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 import { sessionRecord } from "../../lib/record";

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import type { Board } from "../board";
 import type { Line } from "../score";
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { describe, expect, it } from "vitest";
 import { z, type ZodType } from "zod";
 import getSessionRecord from "../agent/tools/get_session_record";

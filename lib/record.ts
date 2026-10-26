@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { defineState } from "eve/context";
 import type { Board } from "./board";
 

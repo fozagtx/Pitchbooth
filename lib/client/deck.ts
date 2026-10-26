@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { GlobalWorkerOptions, getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { BoardSchema } from "../coach";
 import { checkFile, extractSlides } from "../pdf";

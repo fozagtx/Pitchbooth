@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export class MissingConfig extends Error {
   constructor(readonly names: string[]) {
     super(`Missing configuration: ${names.join(", ")}`);

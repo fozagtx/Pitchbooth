@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import type { Board, CueState } from "../board";
 import { createNudger } from "../nudges";
 import {

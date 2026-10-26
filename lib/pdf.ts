@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 export const MAX_PAGES = 20;

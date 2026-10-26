@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { OTLPHttpProtoTraceExporter } from "@vercel/otel";
 import { disableInstrumentation } from "eve/instrumentation";
 import { otelIntegration } from "eve/instrumentation/otel";

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export interface PracticeItem {
   label: string;
   date?: string;

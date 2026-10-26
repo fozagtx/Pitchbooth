@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 class PitchboothPcmProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
