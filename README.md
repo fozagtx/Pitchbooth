@@ -65,3 +65,7 @@ Planned and tracked with the [learn-ai-basics](https://github.com/challengepost/
 ## Deploy
 
 `render.yaml` is a Render Blueprint. Add the same four keys in Render.
+
+## License
+
+[MIT](LICENSE)
