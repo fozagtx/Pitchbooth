@@ -3,5 +3,7 @@ node_modules
 .eve
 .output
 .env*
+!.env.example
 coverage
 *.tsbuildinfo
+/devpost/learner-profile.md
